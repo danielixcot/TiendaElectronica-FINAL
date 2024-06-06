@@ -1,0 +1,97 @@
+﻿@page "/nuevo-dispositivo"
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+<h3>Nuevo Dispositivo</h3>
+
+<EditForm Model="@laptop" OnValidSubmit="@Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="Serie">No. serie del dispositivo</label>
+        <InputNumber id="Serie" @bind-Value="laptop.Serie" class="form-control" />
+        <ValidationMessage For="() => laptop.Serie" />
+    </div>
+    <div class="form-group">
+        <label for="Marca">Marca del dispositivo</label>
+        <InputText id="Marca" @bind-Value="laptop.Marca" class="form-control" />
+        <ValidationMessage For="() => laptop.Marca" />
+    </div>
+    <div class="form-group">
+        <label for="Modelo">Modelo del dispositivo</label>
+        <InputNumber id="Modelo" @bind-Value="laptop.Modelo" class="form-control" />
+        <ValidationMessage For="() => laptop.Modelo" />
+    </div>
+    <div class="form-group">
+        <label for="Ram">Ram de la laptop</label>
+        <InputNumber id="Ram" @bind-Value="laptop.Ram" class="form-control" />
+        <ValidationMessage For="() => laptop.Ram" />
+    </div>
+    <div class="form-group">
+        <label for="Almacenamiento">Almacenamiento de la laptop</label>
+    <InputNumber id="Almacenamiento" @bind-Value="laptop.Almacenamiento" class="form-control" />
+    <ValidationMessage For="() => laptop.Almacenamiento" />
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+    </div>
+</EditForm>
+@if (laptops != null)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Serie</th>
+                <th>Marca</th>
+                <th>Modelo</th>
+                <th>Memoria RAM</th>
+                <th>Almacenamiento</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var laptop in laptops)
+            {
+                <tr>
+                    <td>@laptop.Serie</td>
+                    <td>@laptop.Marca</td>
+                    <td>@laptop.Modelo</td>
+                    <td>@laptop.Ram</td>
+                    <td>@laptop.Almacenamiento</td>
+                    <td>
+                        <button class="btn btn-warning" @onclick="@(() => NavigationManager.NavigateTo($"/editar-dispositivo/{laptop.Marca}"))">
+                            Editar
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="@(() => Borrar(laptop.Marca))">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    Laptop laptop = new Laptop();
+    List<Laptop> laptops = new List<Laptop>();
+
+    protected async Task Guardar()
+    {
+        laptops.Add(laptop);
+        laptop = new Laptop();
+        await localStorage.SetItemAsync("laptops", laptops);
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        laptops = await localStorage.GetItemAsync<List<Laptop>>("laptops");
+    }
+    protected async Task Borrar (string Marca)
+    {
+        laptops.Remove(laptops.First(c => c.Marca == Marca));
+        await localStorage.SetItemAsync("laptops", laptops);
+    }
+}
